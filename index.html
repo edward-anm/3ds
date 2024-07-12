@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JWT Generation and Submission</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f4f7;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input {
+            width: calc(100% - 16px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            padding: 10px 20px;
+            background-color: #0056b3;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .form-group button:hover {
+            background-color: #004494;
+        }
+        .form-group button:active {
+            background-color: #003366;
+        }
+        .jwt-output {
+            padding: 15px;
+            background: #e9f5ff;
+            border: 1px solid #cce5ff;
+            border-radius: 5px;
+            word-wrap: break-word;
+            white-space: pre-wrap; /* Allows line breaks in the JWT */
+        }
+        .response {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.2.0/jsrsasign-all-min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>JWT Generation and Submission</h1>
+
+    <!-- JWT Generation Form -->
+    <form id="jwtGenerationForm">
+        <div class="form-group">
+            <label for="api_key">API Key:</label>
+            <input type="text" id="api_key" name="api_key" required>
+        </div>
+        <div class="form-group">
+            <label for="api_id">API ID:</label>
+            <input type="text" id="api_id" name="api_id" required>
+        </div>
+        <div class="form-group">
+            <label for="org_unit_id">Org Unit ID:</label>
+            <input type="text" id="org_unit_id" name="org_unit_id" required>
+        </div>
+        <div class="form-group">
+            <label for="return_url">Return URL:</label>
+            <input type="text" id="return_url" name="return_url" required>
+        </div>
+        <div class="form-group">
+            <label for="reference_id">Reference ID:</label>
+            <input type="text" id="reference_id" name="reference_id" required>
+        </div>
+        <div class="form-group">
+            <button type="button" onclick="generateJWT()">Generate JWT</button>
+        </div>
+    </form>
+
+    <!-- JWT Submission Form -->
+    <form id="jwtSubmissionForm" method="POST" action="https://centinelapistag.cardinalcommerce.com" onsubmit="return submitJWT();">
+        <input type="hidden" name="JWT" id="jwtInput" value="">
+        <div class="form-group">
+            <button type="submit">Submit JWT</button>
+        </div>
+    </form>
+
+    <!-- Display JWT Output -->
+    <div id="response" class="response jwt-output">
+        <!-- Generated JWT will appear here -->
+    </div>
+</div>
+
+<script>
+    function generateJWT() {
+        // Retrieve form values
+        const apiKey = document.getElementById('api_key').value;
+        const apiId = document.getElementById('api_id').value;
+        const orgUnitId = document.getElementById('org_unit_id').value;
+        const returnUrl = document.getElementById('return_url').value;
+        const referenceId = document.getElementById('reference_id').value;
+
+        // Define the payload
+        const payload = {
+            apiKey: apiKey,
+            apiId: apiId,
+            orgUnitId: orgUnitId,
+            returnUrl: returnUrl,
+            referenceId: referenceId
+        };
+
+        // Define a secret key (this should be securely managed in production)
+        const secretKey = 'your_secret_key';
+
+        // Create JWT
+        const header = { alg: 'HS256', typ: 'JWT' };
+        const jwt = KJUR.jws.JWS.sign(header.alg, JSON.stringify(header), JSON.stringify(payload), secretKey);
+
+        // Set the JWT in the hidden input of the submission form
+        document.getElementById('jwtInput').value = jwt;
+
+        // Display the JWT in the response area
+        const responseDiv = document.getElementById('response');
+        responseDiv.innerHTML = `<strong>Generated JWT:</strong><br>${jwt}`;
+    }
+
+    function submitJWT() {
+        // Ensure the form submission is handled properly
+        const jwt = document.getElementById('jwtInput').value;
+        console.log(jwt)
+        if (jwt) {
+            // Open a new window or tab to submit the JWT
+            window.open('https://centinelapistag.cardinalcommerce.com', '_blank');
+            return false; // Prevent default form submission
+        }
+        return false;
+    }
+</script>
+
+</body>
+</html>
